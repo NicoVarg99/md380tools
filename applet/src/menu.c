@@ -265,24 +265,6 @@ void create_menu_entry_datef_original_screen(void) {
   global_addl_config.datef = 0;
 }
 
-void create_menu_entry_datef_iso8601_screen(void) {
-  struct MENU *menu_mem;
-
-  menu_mem = (void *)((md380_menu_memory + ((md380_menu_depth) * sizeof(struct MENU))) + sizeof(struct MENU));
-  menu_mem->menu_title = wt_datef_iso8601;
-
-  menu_mem->unknownp = 0x14 * md380_menu_id + md380_menu_mem_base;
-
-  menu_mem->numberof_menu_entries=1;
-  menu_mem->unknown_00 = 0;
-  menu_mem->unknown_01 = 0;
-
-#ifdef CONFIG_MENU
-  create_menu_entry_hook( md380_menu_id, wt_datef_iso8601, md380_menu_entry_back+1, md380_menu_entry_back+1, 6, 2 , 1);
-#endif
-  spiflash_write_with_type_check("1", spi_flash_addl_config_start + offset_datef, 1);
-  global_addl_config.datef = 1;
-}
 
 void create_menu_entry_datef_germany_screen(void) {
   struct MENU *menu_mem;
@@ -299,8 +281,8 @@ void create_menu_entry_datef_germany_screen(void) {
 #ifdef CONFIG_MENU
   create_menu_entry_hook( md380_menu_id, wt_datef_germany, md380_menu_entry_back+1, md380_menu_entry_back+1, 6, 2 , 1);
 #endif
-  spiflash_write_with_type_check("2", spi_flash_addl_config_start + offset_datef, 1);
-  global_addl_config.datef = 2;
+  spiflash_write_with_type_check("1", spi_flash_addl_config_start + offset_datef, 1);
+  global_addl_config.datef = 1;
 }
 
 void create_menu_entry_datef_italy_screen(void) {
@@ -318,8 +300,8 @@ void create_menu_entry_datef_italy_screen(void) {
 #ifdef CONFIG_MENU
   create_menu_entry_hook( md380_menu_id, wt_datef_italy, md380_menu_entry_back+1, md380_menu_entry_back+1, 6, 2 , 1);
 #endif
-  spiflash_write_with_type_check("3", spi_flash_addl_config_start + offset_datef, 1);
-  global_addl_config.datef = 3;
+  spiflash_write_with_type_check("2", spi_flash_addl_config_start + offset_datef, 1);
+  global_addl_config.datef = 2;
 }
 
 void create_menu_entry_datef_american_screen(void) {
@@ -337,9 +319,29 @@ void create_menu_entry_datef_american_screen(void) {
 #ifdef CONFIG_MENU
   create_menu_entry_hook( md380_menu_id, wt_datef_american, md380_menu_entry_back+1, md380_menu_entry_back+1, 6, 2 , 1);
 #endif
+  spiflash_write_with_type_check("3", spi_flash_addl_config_start + offset_datef, 1);
+  global_addl_config.datef = 3;
+}
+
+void create_menu_entry_datef_iso8601_screen(void) {
+  struct MENU *menu_mem;
+
+  menu_mem = (void *)((md380_menu_memory + ((md380_menu_depth) * sizeof(struct MENU))) + sizeof(struct MENU));
+  menu_mem->menu_title = wt_datef_iso8601;
+
+  menu_mem->unknownp = 0x14 * md380_menu_id + md380_menu_mem_base;
+
+  menu_mem->numberof_menu_entries=1;
+  menu_mem->unknown_00 = 0;
+  menu_mem->unknown_01 = 0;
+
+#ifdef CONFIG_MENU
+  create_menu_entry_hook( md380_menu_id, wt_datef_iso8601, md380_menu_entry_back+1, md380_menu_entry_back+1, 6, 2 , 1);
+#endif
   spiflash_write_with_type_check("4", spi_flash_addl_config_start + offset_datef, 1);
   global_addl_config.datef = 4;
 }
+
 
 void create_menu_entry_userscsv_enable_screen(void) {
   struct MENU *menu_mem;
@@ -359,6 +361,8 @@ void create_menu_entry_userscsv_enable_screen(void) {
   spiflash_write_with_type_check("1", spi_flash_addl_config_start + offset_userscsv, 1);
   global_addl_config.userscsv = 1;
 }
+
+
 
 void create_menu_entry_userscsv_disable_screen(void) {
   struct MENU *menu_mem;
@@ -568,7 +572,7 @@ void create_menu_entry_datef_screen(void) {
   menu_mem->menu_title = wt_datef;
 
   menu_mem->unknownp = 0x14 * md380_menu_id + md380_menu_mem_base;
-  menu_mem->numberof_menu_entries=4;
+  menu_mem->numberof_menu_entries=5;
   menu_mem->unknown_00 = 0;
   menu_mem->unknown_01 = 0;
 
@@ -590,10 +594,11 @@ void create_menu_entry_datef_screen(void) {
 
 #ifdef CONFIG_MENU
   create_menu_entry_hook( md380_menu_id,     wt_datef_original,  create_menu_entry_datef_original_screen + 1, md380_menu_entry_back+1,  0x8b, 0 , 1);
-  create_menu_entry_hook( md380_menu_id + 1, wt_datef_iso8601,  create_menu_entry_datef_germany_screen + 1, md380_menu_entry_back+1, 0x8b, 0 , 1);
-  create_menu_entry_hook( md380_menu_id + 2, wt_datef_germany,  create_menu_entry_datef_germany_screen + 1, md380_menu_entry_back+1, 0x8b, 0 , 1);
+  create_menu_entry_hook( md380_menu_id + 1, wt_datef_iso8601,  create_menu_entry_datef_iso8601_screen + 1, md380_menu_entry_back+1, 0x8b, 0 , 1);
+  create_menu_entry_hook( md380_menu_id + 2, wt_datef_germany,  create_menu_entry_datef_germany_screen + 1, md380_menu_entry_back+1, 0x8b, 0 , 1);  
   create_menu_entry_hook( md380_menu_id + 3, wt_datef_italy,  create_menu_entry_datef_italy_screen + 1, md380_menu_entry_back+1, 0x8b, 0 , 1);
   create_menu_entry_hook( md380_menu_id + 4, wt_datef_american,  create_menu_entry_datef_american_screen + 1, md380_menu_entry_back+1, 0x8b, 0 , 1);
+
 #endif
 
   for(i=0;i<5;i++) { // not yet known ;)
