@@ -133,15 +133,6 @@ void print_date_hook(void) {  // copy from the md380 code
     md380_itow(&wide[8], RTC_DateStruct.RTC_Date);
   }
   if ( global_addl_config.datef == 1) {
-  wide[0]='2';
-    wide[1]='0';
-    md380_itow(&wide[2], RTC_DateStruct.RTC_Year);
-    wide[4]='-';
-    md380_itow(&wide[5], RTC_DateStruct.RTC_Month);
-    wide[7]='-';
-    md380_itow(&wide[8], RTC_DateStruct.RTC_Date);
-  }
-  if ( global_addl_config.datef == 2) {
     md380_itow(&wide[0], RTC_DateStruct.RTC_Date);
     wide[2]='.';
     md380_itow(&wide[3], RTC_DateStruct.RTC_Month);
@@ -150,7 +141,7 @@ void print_date_hook(void) {  // copy from the md380 code
     wide[7]='0';
     md380_itow(&wide[8], RTC_DateStruct.RTC_Year);
   }
-  if ( global_addl_config.datef == 3) {
+  if ( global_addl_config.datef == 2) {
     md380_itow(&wide[0], RTC_DateStruct.RTC_Date);
     wide[2]='/';
     md380_itow(&wide[3], RTC_DateStruct.RTC_Month);
@@ -159,7 +150,7 @@ void print_date_hook(void) {  // copy from the md380 code
     wide[7]='0';
     md380_itow(&wide[8], RTC_DateStruct.RTC_Year);
   }
-  if ( global_addl_config.datef == 4) {
+  if ( global_addl_config.datef == 3) {
     md380_itow(&wide[0], RTC_DateStruct.RTC_Month);
     wide[2]='/';
     md380_itow(&wide[3], RTC_DateStruct.RTC_Date);
@@ -167,6 +158,15 @@ void print_date_hook(void) {  // copy from the md380 code
     wide[6]='2';
     wide[7]='0';
     md380_itow(&wide[8], RTC_DateStruct.RTC_Year);    
+  }
+  if ( global_addl_config.datef == 4) {
+    wide[0]='2';
+    wide[1]='0';
+    md380_itow(&wide[2], RTC_DateStruct.RTC_Year);
+    wide[4]='-';
+    md380_itow(&wide[5], RTC_DateStruct.RTC_Month);
+    wide[7]='-';
+    md380_itow(&wide[8], RTC_DateStruct.RTC_Date);
   }
 
   wide[10]='\0';
