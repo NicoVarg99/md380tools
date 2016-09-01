@@ -28,10 +28,10 @@ const static wchar_t wt_enable[]            = L"Enable";
 const static wchar_t wt_rbeep[]             = L"M. RogerBeep";
 const static wchar_t wt_userscsv[]          = L"UsersCSV";
 const static wchar_t wt_datef_original[]    = L"YYYY/MM/DD";
-const static wchar_t wt_datef_iso8601[]     = L"YYYY-MM-DD";
 const static wchar_t wt_datef_germany[]     = L"DD.MM.YYYY";
 const static wchar_t wt_datef_italy[]       = L"DD/MM/YYYY";
 const static wchar_t wt_datef_american[]    = L"MM/DD/YYYY";
+const static wchar_t wt_datef_iso8601[]     = L"DD-MM-YYYY";
 const static wchar_t wt_promtg[]            = L"Promiscuous";
 const static wchar_t wt_edit[]              = L"Edit";
 const static wchar_t wt_edit_dmr_id[]       = L"Edit DMR-ID";
@@ -265,7 +265,6 @@ void create_menu_entry_datef_original_screen(void) {
   global_addl_config.datef = 0;
 }
 
-
 void create_menu_entry_datef_germany_screen(void) {
   struct MENU *menu_mem;
 
@@ -342,7 +341,6 @@ void create_menu_entry_datef_iso8601_screen(void) {
   global_addl_config.datef = 4;
 }
 
-
 void create_menu_entry_userscsv_enable_screen(void) {
   struct MENU *menu_mem;
 
@@ -361,8 +359,6 @@ void create_menu_entry_userscsv_enable_screen(void) {
   spiflash_write_with_type_check("1", spi_flash_addl_config_start + offset_userscsv, 1);
   global_addl_config.userscsv = 1;
 }
-
-
 
 void create_menu_entry_userscsv_disable_screen(void) {
   struct MENU *menu_mem;
@@ -592,13 +588,13 @@ void create_menu_entry_datef_screen(void) {
     md380_menu_entry_selected = 4;
   }
 
+
 #ifdef CONFIG_MENU
   create_menu_entry_hook( md380_menu_id,     wt_datef_original,  create_menu_entry_datef_original_screen + 1, md380_menu_entry_back+1,  0x8b, 0 , 1);
-  create_menu_entry_hook( md380_menu_id + 1, wt_datef_iso8601,  create_menu_entry_datef_iso8601_screen + 1, md380_menu_entry_back+1, 0x8b, 0 , 1);
-  create_menu_entry_hook( md380_menu_id + 2, wt_datef_germany,  create_menu_entry_datef_germany_screen + 1, md380_menu_entry_back+1, 0x8b, 0 , 1);  
-  create_menu_entry_hook( md380_menu_id + 3, wt_datef_italy,  create_menu_entry_datef_italy_screen + 1, md380_menu_entry_back+1, 0x8b, 0 , 1);
-  create_menu_entry_hook( md380_menu_id + 4, wt_datef_american,  create_menu_entry_datef_american_screen + 1, md380_menu_entry_back+1, 0x8b, 0 , 1);
-
+  create_menu_entry_hook( md380_menu_id + 1, wt_datef_germany,  create_menu_entry_datef_germany_screen + 1, md380_menu_entry_back+1, 0x8b, 0 , 1);
+  create_menu_entry_hook( md380_menu_id + 2, wt_datef_italy,  create_menu_entry_datef_italy_screen + 1, md380_menu_entry_back+1, 0x8b, 0 , 1);
+  create_menu_entry_hook( md380_menu_id + 3, wt_datef_american,  create_menu_entry_datef_american_screen + 1, md380_menu_entry_back+1, 0x8b, 0 , 1);
+  create_menu_entry_hook( md380_menu_id + 4, wt_datef_iso8601,  create_menu_entry_datef_iso8601_screen + 1, md380_menu_entry_back+1, 0x8b, 0 , 1);
 #endif
 
   for(i=0;i<5;i++) { // not yet known ;)
