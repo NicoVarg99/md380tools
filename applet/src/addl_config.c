@@ -39,6 +39,9 @@ void init_global_addl_config_struct() {
   if (buf[0] == '3') {
     global_addl_config.datef = 3;
   }
+  if (buf[0] == '4') {
+    global_addl_config.datef = 4;
+  }
 
   md380_spiflash_read(buf, spi_flash_addl_config_start + offset_userscsv, 1);
   if (buf[0] == '1') {
