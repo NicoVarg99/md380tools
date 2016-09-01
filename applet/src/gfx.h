@@ -1,38 +1,188 @@
-/*! \file gfx.h
-  \brief Graphics function wrappers.
+/*! \file gfx.c
+  \brief Graphics wrapper functions.
 */
 
-//! Draws wide text at an address by calling back to the MD380 function.
+#include "md380.h"
+#include "version.h"
+#include "tooldfu.h"
+#include "config.h"
+#include "gfx.h"
+#include "printf.h"
+#include "string.h"
+#include "addl_config.h"
+
+//Needed for LED functions.  Cut dependency.
+#include "stm32f4_discovery.h"
+#include "stm32f4xx_conf.h" // again, added because ST didn't put it here ?
+
+
+char eye_paltab[] = {
+  0xd7, 0xd8, 0xd6, 0x00, 0x88, 0x8a, 0x85, 0x00, 0xe1, 0xe2, 0xe0, 0x00, 0xff, 0xff, 0xff, 0x00,
+  0xae, 0xae, 0xaf, 0x00, 0x24, 0x4e, 0x8a, 0x00, 0x5d, 0x88, 0xbb, 0x00, 0xd1, 0xd2, 0xd4, 0x00,
+  0xf4, 0xf4, 0xf4, 0x00, 0x3c, 0x66, 0x9f, 0x00, 0xdb, 0xe6, 0xf3, 0x00, 0x48, 0x73, 0xaa, 0x00,
+  0xb6, 0xb8, 0xb4, 0x00, 0x5e, 0x6a, 0x77, 0x00
+  };
+char eye_pix[] = {
+  0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x01,0x10,0x11,0x10,0x00,0x00,0x23,
+  0x41,0x11,0x31,0x00,0x01,0x14,0x55,0x55,0x61,0x00,0x21,0x75,0x88,0x59,0x94,0x31,0x3a,0x85,0x88,0x56,
+  0x57,0x73,0x21,0x86,0x55,0x5b,0x67,0x41,0x13,0x48,0x66,0x69,0x71,0xc1,0x0c,0x13,0x47,0x33,0x11,0x10,
+  0x00,0x03,0xdc,0xd1,0xd0,0x00,0x00,0x00,0x00,0x00,0x00,0x00
+  };
+const gfx_pal    eye_pal    = { 14, 0, eye_paltab};
+const gfx_bitmap bmp_eye    = { 12, 12, 6, 4, eye_pix, &eye_pal, 0};
+
+
+//! Draws text at an address by calling back to the MD380 function.
 void drawtext(wchar_t *text,
-	      int x, int y);
-//! Draws ASCII on the screen.
+	      int x, int y){
+#ifdef CONFIG_GRAPHICS
+  gfx_drawtext(text,
+	       0,0,
+	       x,y,
+	       15); //strlen(text));
+#endif
+}
+//! Draws text at an address by calling back to the MD380 function.
 void drawascii(char *ascii,
-	       int x, int y);
+	       int x, int y){
+  //Widen the string.  We really ought to do proper lengths.
+  wchar_t wide[15];
+  for(int i=0;i<15;i++)
+    wide[i]=ascii[i];
+
+#ifdef CONFIG_GRAPHICS
+  //Draw the wide string, not the original.
+  gfx_drawtext(wide,
+	       0,0,
+	       x,y,
+	       15); //strlen(text));
+#endif
+}
 
 void drawascii2(char *ascii,
-                int x, int y);
+                int x, int y){
+  wchar_t wide[40];
 
-void green_led(int on);
-void red_led(int on);
-void lcd_background_led(int on);
+  for(int i=0;i<25;i++)
+        {
+        wide[i]=ascii[i];
+        if (ascii[i]=='\0')
+           break;
+        }
+#ifdef CONFIG_GRAPHICS
+  gfx_drawtext2(wide, x, y, 0);
+#endif
+}
+
+void green_led(int on) {
+  if (on) {
+    GPIO_SetBits(GPIOE, GPIO_Pin_0);
+  } else {
+    GPIO_ResetBits(GPIOE, GPIO_Pin_0);
+  }
+}
 
 
-typedef struct gfx_pal {
-  long	ncol;
-  long  someb; 
-  const char * palptr;
-  } gfx_pal;
+void red_led(int on) {
+  /* The RED LED is supposed to be on pin A0 by the schematic, but in
+     point of fact it's on E1.  Expect more hassles like this.
+  */
 
+  if (on) {
+    GPIO_SetBits(GPIOE, GPIO_Pin_1);
+  } else {
+    GPIO_ResetBits(GPIOE, GPIO_Pin_1);
+  }
+}
 
- 
-typedef struct gfx_bitmap {
-  short            width;
-  short            height;
-  short            bytesperline;
-  short            bitsperpixel;
-  const char *     pixptr;
-  const gfx_pal *  palstruct;
-  const gfx_pal *  not_known;
-  } gfx_bitmap;
-                            
-extern const gfx_bitmap bmp_eye;
+void lcd_background_led(int on) {
+  if (on) {
+    GPIO_SetBits(GPIOC, GPIO_Pin_6);
+  } else {
+    GPIO_ResetBits(GPIOC, GPIO_Pin_6);
+  }
+}
+
+/*
+void dump_ram_to_spi_flash() {
+  static int run = 0;
+  if ( run == 10) {
+    printf("dump\n");
+    for ( int i=0; i < (112+16); i++) {
+      md380_spiflash_write((void *) 0x20000000+(1024*i), 0x400000+(1024*i), 1024);
+    }
+  }
+  run++;
+}
+
+*/
+
+void print_date_hook(void) {  // copy from the md380 code
+#ifdef CONFIG_GRAPHICS
+  wchar_t wide[40];
+  RTC_DateTypeDef RTC_DateStruct;
+  md380_RTC_GetDate(RTC_Format_BCD, &RTC_DateStruct);
+
+  if ( global_addl_config.datef == 0) {
+    wide[0]='2';
+    wide[1]='0';
+    md380_itow(&wide[2], RTC_DateStruct.RTC_Year);
+    wide[4]='/';
+    md380_itow(&wide[5], RTC_DateStruct.RTC_Month);
+    wide[7]='/';
+    md380_itow(&wide[8], RTC_DateStruct.RTC_Date);
+  }
+  if ( global_addl_config.datef == 1) {
+    md380_itow(&wide[0], RTC_DateStruct.RTC_Date);
+    wide[2]='.';
+    md380_itow(&wide[3], RTC_DateStruct.RTC_Month);
+    wide[5]='.';
+    wide[6]='2';
+    wide[7]='0';
+    md380_itow(&wide[8], RTC_DateStruct.RTC_Year);
+  }
+  if ( global_addl_config.datef == 2) {
+    md380_itow(&wide[0], RTC_DateStruct.RTC_Date);
+    wide[2]='/';
+    md380_itow(&wide[3], RTC_DateStruct.RTC_Month);
+    wide[5]='/';
+    wide[6]='2';
+    wide[7]='0';
+    md380_itow(&wide[8], RTC_DateStruct.RTC_Year);
+  }
+  if ( global_addl_config.datef == 3) {
+    md380_itow(&wide[0], RTC_DateStruct.RTC_Month);
+    wide[2]='/';
+    md380_itow(&wide[3], RTC_DateStruct.RTC_Date);
+    wide[5]='/';
+    wide[6]='2';
+    wide[7]='0';
+    md380_itow(&wide[8], RTC_DateStruct.RTC_Year);    
+  }
+ if ( global_addl_config.datef == 4) {
+  wide[0]='2';
+    wide[1]='0';
+    md380_itow(&wide[2], RTC_DateStruct.RTC_Year);
+    wide[4]='-';
+    md380_itow(&wide[5], RTC_DateStruct.RTC_Month);
+    wide[7]='-';
+    md380_itow(&wide[8], RTC_DateStruct.RTC_Date);
+  }
+
+  wide[10]='\0';
+  gfx_chars_to_display( wide, 0xa, 0x60, 0x5e);
+
+//  dump_ram_to_spi_flash();
+
+//  gfx_drawbmp((char *) &bmp_eye, 20, 2);
+#endif //CONFIG_GRAPHICS
+}
+
+void print_ant_sym_hook(char *bmp, int x, int y) {
+#ifdef CONFIG_GRAPHICS
+  gfx_drawbmp(bmp, x, y);
+  if(global_addl_config.promtg==1) {
+    gfx_drawbmp((char *) &bmp_eye, 65, 1);
+  }
+#endif
+}
